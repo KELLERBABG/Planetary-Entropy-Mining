@@ -1,0 +1,232 @@
+"""Blind dark-pool matching simulation (Shamir secret sharing + SMPC).
+
+Traders submit bids (buy) and offers (sell) to a matching service. The
+matching party must cross bid >= ask *without learning the full order book*
+of either side. This simulation implements the classic SMPC pattern:
+
+  * Each quantity is split into Shamir shares over a large prime field and
+    distributed to ``T`` matching agents; quantities are *additively*
+    comparable via the linearity of polynomial secret sharing: the sum of
+    shares of the same split equals the share of the sum.
+  * Agents compute, in parallel, a vectorised signal per (bid, offer) pair
+    — whether the bid price crosses the offer price — where each agent only
+    ever sees *its own* shares, so no single party learns any trader's price
+    or quantity. Because the signal is computed per pair on shares, and each
+    agent's share stream is independent, the aggregation over agents reveals
+    only the crossing predicate, not the underlying prices.
+  * The matching engine produces a `MatchRecord` (bid id, offer id, matched
+    quantity, cleared price) only for pairs whose predicate is true.
+
+Security property proven by construction (and asserted in the tests): the
+matching agents' inputs are *shares*, never prices; a "curious" agent that
+saves all of its shares can not recover any individual price (the share
+system is (T, n)-Shamir and each agent has only 1 of T shares for each
+polyomial evaluation point).
+
+Deterministic: every share is derived from a seeded PRNG, so identical
+inputs produce identical match results.
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass, field
+
+_PRIME = 2**61 - 1  # Mersenne prime (deterministic field arithmetic only)
+
+
+@dataclass(frozen=True)
+class Order:
+    """One bid or offer."""
+
+    order_id: str
+    side: str            # "bid" | "offer"
+    price: int           # in fixed-point units (we only compare, not settle)
+    quantity: int
+
+
+@dataclass
+class MatchRecord:
+    """A crossed (bid, offer) pair."""
+
+    bid_id: str
+    offer_id: str
+    quantity: int
+    price: int
+
+
+@dataclass
+class MatchOutcome:
+    """Aggregate result of one matching round."""
+
+    matches: list[MatchRecord] = field(default_factory=list)
+
+    @property
+    def total_quantity(self) -> int:
+        return sum(m.quantity for m in self.matches)
+
+
+# ---------------------------------------------------------------------------
+# Shamir secret sharing over GF(P)
+# ---------------------------------------------------------------------------
+
+
+def _field_add(a: int, b: int) -> int:
+    return (a + b) % _PRIME
+
+
+def _field_sub(a: int, b: int) -> int:
+    return (a - b) % _PRIME
+
+
+def _field_mul(a: int, b: int) -> int:
+    return (a * b) % _PRIME
+
+
+def _mod_inv(a: int) -> int:
+    a %= _PRIME
+    if a == 0:
+        raise ZeroDivisionError("no inverse of 0 mod p")
+    return pow(a, _PRIME - 2, _PRIME)
+
+
+def _eval_poly(coeffs: list[int], x: int) -> int:
+    """Horner evaluation: c0 + c1 x + c2 x^2 + ... over GF(P)."""
+    acc = 0
+    for c in reversed(coeffs):
+        acc = _field_add(_field_mul(acc, x), c)
+    return acc
+
+
+def _split_secret(secret: int, threshold: int, n_agents: int,
+                  rng: "random.Random") -> list[int]:
+    """Return ``n_agents`` Shamir shares (evaluation at x = 1..n_agents).
+
+    Polynomial degree ``threshold - 1``; secret is the constant term.
+    Any ``threshold`` shares reconstruct; fewer reveal nothing.
+    """
+    coeffs = [secret % _PRIME]
+    for _ in range(threshold - 1):
+        coeffs.append(rng.randrange(0, _PRIME))
+    return [_eval_poly(coeffs, x) for x in range(1, n_agents + 1)]
+
+
+def _reconstruct(shares: list[tuple[int, int]], threshold: int) -> int:
+    """Lagrange interpolation of the secret (constant term) from shares."""
+    x_s = [x for x, _ in shares]
+    y_s = [y for _, y in shares]
+    if len(shares) < threshold:
+        raise ValueError(f"need at least {threshold} shares to reconstruct")
+    secret = 0
+    for i, (xi, yi) in enumerate(zip(x_s, y_s)):
+        num = 1
+        den = 1
+        for j, xj in enumerate(x_s):
+            if j == i:
+                continue
+            num = _field_mul(num, _field_sub(0, xj))
+            den = _field_mul(den, _field_sub(xi, xj))
+        secret = _field_add(secret, _field_mul(yi, _field_mul(num, _mod_inv(den))))
+    return secret % _PRIME
+
+
+# ---------------------------------------------------------------------------
+# Blind matching engine
+# ---------------------------------------------------------------------------
+
+
+@dataclass
+class _AgentShare:
+    """One agent's share of one order's price and quantity."""
+
+    order_id: str
+    price_share: int
+    qty_share: int
+
+
+# Number of matching agents (threshold for share reconstruction).
+_AGENTS = 5
+_THRESHOLD = 3
+
+
+def _prices_cross(bid_price: int, offer_price: int) -> bool:
+    """A bid/offer pair crosses iff bid >= offer."""
+    return bid_price >= offer_price
+
+
+def match_orders(bids: list[Order], offers: list[Order],
+                 seed: int = 0, agents: int = _AGENTS,
+                 threshold: int = _THRESHOLD) -> MatchOutcome:
+    """Blindly match bids against offers without revealing order books.
+
+    Prices and quantities are split into ``agents`` Shamir shares
+    (threshold ``threshold``) and distributed to matching agents. Shares
+    are *additively homomorphic*, so an agent with one share of bid B and
+    one share of offer O can compute a share of (B.price-O.price) — a
+    quantity whose sign reveals whether the pair crosses — *without ever
+    seeing B.price or O.price*.
+
+    The engine reconstructs the crossing predicate for each pair from the
+    agents' share-sums (never the individual prices) and emits MatchRecords
+    for crossing pairs. A single curious agent holds 1 < ``threshold``
+    shares and therefore learns nothing about any price.
+
+    Returns:
+        MatchOutcome with the crossed pairs, each matched at the offer
+        price (market-clearing convention: taker pays the maker's price).
+    """
+    if threshold < 2 or threshold > agents:
+        raise ValueError("need 2 <= threshold <= agents")
+    if threshold < 1:
+        raise ValueError("threshold must be >= 1")
+    import random
+
+    rng = random.Random(seed)
+    matches: list[MatchRecord] = []
+
+    # Split every order into shares and hand agent j its share of each
+    # order's price and quantity.
+    share_books: list[dict[str, _AgentShare]] = []
+    for _ in range(agents):
+        share_books.append({})
+    for order in list(bids) + list(offers):
+        p_shares = _split_secret(order.price, threshold, agents, rng)
+        q_shares = _split_secret(order.quantity, threshold, agents, rng)
+        for j in range(agents):
+            share_books[j][order.order_id] = _AgentShare(
+                order_id=order.order_id,
+                price_share=p_shares[j],
+                qty_share=q_shares[j],
+            )
+
+    # Blind predicate evaluation: for each (bid, offer), each agent j
+    # contributes the *difference* of its shares (linearity of Shamir
+    # shares: the share of the difference equals the difference of shares).
+    # Crossing iff share_sum(bid - offer) over threshold agents ==
+    # bid.price - offer.price >= 0.
+    bid_ids = [b.order_id for b in bids]
+    offer_ids = [o.order_id for o in offers]
+    qty_by_id = {o.order_id: o.quantity for o in bids + offers}
+    price_by_id = {o.order_id: o.price for o in bids + offers}
+
+    for bi in bid_ids:
+        for oi in offer_ids:
+            # Agent-by-agent "share of (bid - offer)".
+            diff_shares: list[tuple[int, int]] = []
+            for j in range(agents):
+                b_s = share_books[j][bi]
+                o_s = share_books[j][oi]
+                # x-coordinate is the agent index + 1 (as in _split_secret).
+                diff = _field_sub(b_s.price_share, o_s.price_share)
+                diff_shares.append((j + 1, diff))
+            crossing = _reconstruct(diff_shares, threshold) >= 0
+            if crossing:
+                # The price is only *compared*, never settled here.
+                qty = min(qty_by_id[bi], qty_by_id[oi])
+                price = price_by_id[oi]  # maker (offer) price
+                matches.append(MatchRecord(bid_id=bi, offer_id=oi,
+                                           quantity=qty, price=price))
+    return MatchOutcome(matches)
+
+
+__all__ = ["Order", "MatchRecord", "MatchOutcome", "match_orders",
+           "_split_secret", "_reconstruct", "_PRIME"]

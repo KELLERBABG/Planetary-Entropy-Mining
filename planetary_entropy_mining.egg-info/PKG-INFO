@@ -1,0 +1,67 @@
+Metadata-Version: 2.4
+Name: planetary-entropy-mining
+Version: 0.1.0
+Summary: Harvest environmental entropy into cryptographic certificates: capture sim, SP 800-90B estimation, lattice-style hardening, nullifiers, erasure coding, onion framing, DTN mesh, dark pool, settlement.
+Requires-Python: >=3.11
+Description-Content-Type: text/markdown
+Requires-Dist: numpy>=1.26
+Requires-Dist: scipy>=1.11
+Requires-Dist: cryptography>=42
+Provides-Extra: dev
+Requires-Dist: pytest>=8; extra == "dev"
+
+# Planetary Entropy Mining
+
+Harvest environmental entropy (thermal, RF, seismic noise) into cryptographically
+verified certificates: simulated capture -> SP 800-90B entropy estimation ->
+lattice-style hardening -> deterministic nullifiers -> zk-SNARK proofs ->
+erasure-coded onion-framed transport through a DTN mesh -> blind dark-pool
+matching -> atomic settlement.
+
+Everything runs on a laptop. No hardware, no network sockets, no real money:
+physical sources exist only as seeded simulators with known statistical truth,
+so every estimator can be validated.
+
+See `AGENTS.md` (working agreement) and `DEVELOPMENT_PLAN.md` (long-term vision).
+
+## Layout
+
+| Path | Contents |
+|------|----------|
+| `dsp/` | capture simulators, FFT/noise-floor analysis, entropy estimators (NIST SP 800-90B), validation suite |
+| `hardening/` | noise-to-polynomial hardening with verifiable structure |
+| `identity/` | deterministic nullifiers, certificate schema + MAC signing |
+| `erasure/` | hand-rolled Reed-Solomon GF(256) n/k sharding |
+| `net/` | Sphinx-style onion framing, DTN mesh simulation, dark pool simulation |
+| `circuits/` | Circom zk circuits + snarkjs scripts |
+| `contracts/` | Solidity settlement contracts (Foundry) |
+| `cli/` | end-to-end demo entrypoint |
+| `docs/` | module docs, NIST report, architecture |
+
+## Quickstart
+
+```powershell
+py -m pip install -e ".[dev]"
+py -m pytest
+py -m cli.demo            # full pipeline: capture -> prove -> ship -> match -> settle
+```
+
+## Module status
+
+| # | Module | Status |
+|---|--------|--------|
+| 1 | Repo bootstrap | done |
+| 2 | Entropy capture sim | done |
+| 3 | Signal processing + estimation | done |
+| 4 | Entropy validation + report | done |
+| 5 | Hardening | done |
+| 6 | Nullifier | done |
+| 7 | Certificate schema | done |
+| 8 | zk circuit + e2e proof | done |
+| 9 | Erasure coding | done |
+| 10 | Sphinx framing | done |
+| 11 | DTN mesh | done |
+| 12 | Dark pool | done |
+| 13 | Settlement contracts | done |
+| 14 | e2e CLI demo | done |
+| 15 | Dashboard | done |

@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Planetary Entropy Mining — Dashboard</title>
+<style>
+  :root {
+    --bg: #0d1117; --panel: #161b22; --panel2: #1c2333; --text: #e6edf3;
+    --muted: #8b949e; --border: #30363d; --green: #3fb950; --red: #f85149;
+    --amber: #d29922; --accent: #58a6ff;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--bg); color: var(--text);
+    font: 14px/1.55 "Segoe UI", system-ui, -apple-system, sans-serif;
+  }
+  header {
+    padding: 22px 28px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 16px; flex-wrap: wrap;
+    background: linear-gradient(180deg, #131a23, #0d1117);
+  }
+  header h1 { margin: 0; font-size: 22px; font-weight: 600; letter-spacing: .01em; }
+  header .sub { color: var(--muted); font-size: 12.5px; margin-top: 3px; }
+  .badge {
+    padding: 5px 14px; border-radius: 999px; font-weight: 700; font-size: 13px;
+    letter-spacing: .04em;
+  }
+  .badge.pass { background: rgba(63,185,80,.14); color: var(--green); border: 1px solid var(--green); }
+  .badge.fail { background: rgba(248,81,73,.14); color: var(--red); border: 1px solid var(--red); }
+  main { max-width: 1060px; margin: 0 auto; padding: 26px 22px 70px; }
+
+  .grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 18px; align-items: start;
+  }
+  .card {
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: 12px; padding: 18px 20px;
+    box-shadow: 0 1px 2px rgba(0,0,0,.35);
+  }
+  .card h2 {
+    margin: 0 0 14px; font-size: 12px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: .09em; color: var(--muted);
+    padding-bottom: 8px; border-bottom: 1px solid var(--border);
+  }
+  .kv { display: grid; grid-template-columns: max-content 1fr; gap: 5px 16px; font-size: 13px; }
+  .kv dt { color: var(--muted); white-space: nowrap; }
+  .kv dd { margin: 0; font-variant-numeric: tabular-nums; text-align: right; word-break: break-all; }
+  .hash { font-family: "Cascadia Code", Consolas, monospace; font-size: 12px; }
+
+  .pipeline { display: grid; gap: 7px; }
+  .stage {
+    display: flex; align-items: center; gap: 12px; padding: 9px 12px;
+    background: var(--panel2); border: 1px solid var(--border);
+    border-radius: 9px;
+  }
+  .stage .dot { width: 10px; height: 10px; border-radius: 50%; flex: none; }
+  .stage .dot.pass { background: var(--green); box-shadow: 0 0 6px rgba(63,185,80,.6); }
+  .stage .dot.fail { background: var(--red); }
+  .stage .name { font-weight: 600; min-width: 118px; flex: none; }
+  .stage .detail { color: var(--muted); font-size: 12.5px; }
+
+  .bars { display: grid; gap: 12px; margin-bottom: 12px; }
+  .bar .lbl {
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-size: 12px; color: var(--muted); margin-bottom: 5px;
+  }
+  .bar .lbl b { color: var(--text); font-weight: 600; }
+  .bar .track {
+    height: 11px; background: #0a0e14; border: 1px solid var(--border);
+    border-radius: 7px; overflow: hidden;
+  }
+  .bar .fill {
+    height: 100%; border-radius: 6px 0 0 6px;
+    background: linear-gradient(90deg, var(--accent), var(--green));
+  }
+
+  .route { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+  .route .hop {
+    background: var(--panel2); border: 1px solid var(--border);
+    padding: 5px 12px; border-radius: 8px; font-size: 13px; font-weight: 500;
+  }
+  .route .arrow { color: var(--muted); }
+
+  .section-gap { height: 20px; }
+  .notice {
+    background: rgba(210,153,34,.12); border: 1px solid var(--amber);
+    color: var(--amber); border-radius: 10px; padding: 12px 16px;
+    font-size: 13px; margin-bottom: 18px;
+  }
+  pre {
+    background: #0a0e14; border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px; overflow: auto; font-size: 12px; line-height: 1.45;
+    max-height: 380px;
+  }
+  footer {
+    color: var(--muted); font-size: 12px; text-align: center;
+    padding: 18px 0 8px; border-top: 1px solid var(--border); margin-top: 34px;
+  }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>Planetary Entropy Mining</h1>
+    <div class="sub">capture &rarr; validate &rarr; harden &rarr; nullify &rarr; certify &rarr; prove &rarr; onion &rarr; shard &rarr; ship &rarr; reconstruct &rarr; unwrap &rarr; match &rarr; settle</div>
+  </div>
+  <div id="overall"></div>
+</header>
+
+<main>
+  <!-- Data is embedded at build time by `py -m cli.e2e --dashboard`:
+       this JSON script tag makes the page fully self-contained so it
+       renders from file:// with no fetch() and no CORS issues. -->
+  <script type="application/json" id="pem-data">
+{
+  "capture": {
+    "bytes": 48000,
+    "sample_rate": 48000.0,
+    "seconds": 1.0,
+    "source": "thermal"
+  },
+  "certificate": {
+    "body_bytes": 815,
+    "mac_b64": "PpaSqyMfvWmq",
+    "version": 1
+  },
+  "entropy": {
+    "conservative_min_bits_per_byte": 5.959866524539016,
+    "nist90b_bits_per_byte": 5.959866524539016,
+    "shannon_bits_per_byte": 7.042899893098178,
+    "truth_bits_per_byte": 7.046843354980835
+  },
+  "hardening": {
+    "degree": 31,
+    "evaluations": 64,
+    "mac": "76c99826f9a87f38",
+    "poly_points": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ]
+  },
+  "identity": {
+    "node_id": "demo-node-1",
+    "nullifier": "0b256ce488ecad0084162c0c0f2dd7add773faffc125fed54c69d03f193fe345",
+    "window_id": "2026-07-31T00:00Z"
+  },
+  "matching": {
+    "bids": 1,
+    "crossed": 2,
+    "offers": 2,
+    "total_quantity": 2
+  },
+  "overall": "PASS",
+  "pipeline": [
+    {
+      "detail": "thermal @ 48,000 Hz, 48000 bytes",
+      "ok": true,
+      "stage": "capture"
+    },
+    {
+      "detail": "shannon=7.043 B/B, 90B floor=5.960 B/B, truth=7.047 B/B",
+      "ok": true,
+      "stage": "entropy"
+    },
+    {
+      "detail": "degree=31, 64 evaluations",
+      "ok": true,
+      "stage": "harden"
+    },
+    {
+      "detail": "0b256ce488ecad0084162c0c... (node=demo-node-1)",
+      "ok": true,
+      "stage": "nullifier"
+    },
+    {
+      "detail": "v1, body=815B",
+      "ok": true,
+      "stage": "certificate"
+    },
+    {
+      "detail": "toy proof layout (window=42), 32B nullifier",
+      "ok": true,
+      "stage": "prove"
+    },
+    {
+      "detail": "3 hops, packet=1196B, payload=815B",
+      "ok": true,
+      "stage": "onion"
+    },
+    {
+      "detail": "Reed-Solomon 2/4, 4 shards",
+      "ok": true,
+      "stage": "shard"
+    },
+    {
+      "detail": "4/4 shards delivered (dropped=0)",
+      "ok": true,
+      "stage": "ship"
+    },
+    {
+      "detail": "4/4 shards -> 1196B onion",
+      "ok": true,
+      "stage": "reconstruct"
+    },
+    {
+      "detail": "payload recovered",
+      "ok": true,
+      "stage": "unwrap"
+    },
+    {
+      "detail": "2 crossed, vol=2",
+      "ok": true,
+      "stage": "match"
+    },
+    {
+      "detail": "nullifier spent={1760472403227428639}, payee balance=100",
+      "ok": true,
+      "stage": "settle"
+    }
+  ],
+  "settlement": {
+    "payee": "payee-node",
+    "payee_balance": 100,
+    "price": 100,
+    "spent_count": 1
+  },
+  "transport": {
+    "dtn_delivered": 4,
+    "dtn_dropped": 0,
+    "onion_bytes": 1196,
+    "route": [
+      "mix-a",
+      "mix-b",
+      "mix-c"
+    ],
+    "rs": {
+      "k": 2,
+      "n": 4
+    },
+    "shards": 4
+  }
+}
+  </script>
+
+  <div class="grid">
+    <div class="card">
+      <h2>Pipeline</h2>
+      <div class="pipeline" id="pipeline"></div>
+    </div>
+
+    <div class="card">
+      <h2>Capture</h2>
+      <dl class="kv" id="capture"></dl>
+      <div class="section-gap"></div>
+      <h2>Entropy &mdash; bits per byte</h2>
+      <div class="bars" id="entropy-bars"></div>
+      <dl class="kv" id="entropy"></dl>
+    </div>
+
+    <div class="card">
+      <h2>Hardening</h2>
+      <dl class="kv" id="hardening"></dl>
+      <div class="section-gap"></div>
+      <h2>Identity</h2>
+      <dl class="kv" id="identity"></dl>
+    </div>
+
+    <div class="card">
+      <h2>Certificate</h2>
+      <dl class="kv" id="certificate"></dl>
+    </div>
+
+    <div class="card">
+      <h2>Transport</h2>
+      <dl class="kv" id="transport"></dl>
+      <div class="route" id="route"></div>
+    </div>
+
+    <div class="card">
+      <h2>Matching & Settlement</h2>
+      <dl class="kv" id="match-settle"></dl>
+    </div>
+  </div>
+
+  <div class="section-gap"></div>
+  <div class="card">
+    <h2>Raw pipeline data</h2>
+    <pre id="raw"></pre>
+  </div>
+
+  <footer>
+    Deterministic simulation &mdash; no hardware, no network sockets, no real money.
+    Regenerate with: <code>py -m cli.e2e --dashboard dashboard/index.html</code>
+  </footer>
+</main>
+
+<script>
+"use strict";
+// 1) Inlined data (self-contained page, works from file://).
+// 2) Fallback: window.PEM_DATA from data.js (static hosting).
+// 3) Fallback: fetch("data.json") (HTTP dev server).
+async function getData() {
+  // 1) Inlined JSON (self-contained file:// page).
+  const inline = document.getElementById("pem-data");
+  if (inline && inline.textContent.trim()) {
+    try { return JSON.parse(inline.textContent); } catch (e) { /* fall */ }
+  }
+  // 2) window.PEM_DATA from a sibling data.js (static hosting).
+  if (window.PEM_DATA) return window.PEM_DATA;
+  // 3) fetch data.json (HTTP dev server where fetch is allowed).
+  try {
+    const res = await fetch("data.json", { cache: "no-store" });
+    if (res.ok) return await res.json();
+  } catch (e) { /* fall */ }
+  return null;
+}
+
+function render(d) {
+  document.getElementById("overall").innerHTML =
+    '<span class="badge ' + (d.overall === "PASS" ? "pass" : "fail") + '">'
+    + d.overall + "</span>";
+
+  // Pipeline stages
+  const pipe = document.getElementById("pipeline");
+  pipe.innerHTML = "";
+  for (const s of d.pipeline) {
+    const div = document.createElement("div");
+    div.className = "stage";
+    div.innerHTML =
+      '<span class="dot ' + (s.ok ? "pass" : "fail") + '"></span>' +
+      '<span class="name">' + s.stage + "</span>" +
+      '<span class="detail">' + s.detail + "</span>";
+    pipe.appendChild(div);
+  }
+
+  // Capture
+  document.getElementById("capture").innerHTML = kv([
+    ["source", d.capture.source],
+    ["sample rate", fmt(d.capture.sample_rate) + " Hz"],
+    ["seconds", d.capture.seconds],
+    ["bytes captured", fmt(d.capture.bytes)],
+  ]);
+
+  // Entropy bars
+  const bars = document.getElementById("entropy-bars");
+  bars.innerHTML = "";
+  const labels = [
+    ["shannon", d.entropy.shannon_bits_per_byte, "blue"],
+    ["NIST SP 800-90B", d.entropy.nist90b_bits_per_byte, "pink"],
+    ["conservative", d.entropy.conservative_min_bits_per_byte, "green"],
+  ];
+  const colors = { blue: "linear-gradient(90deg,#58a6ff,#58a6ff)",
+                   pink: "linear-gradient(90deg,#f778ba,#f778ba)",
+                   green: "linear-gradient(90deg,#3fb950,#3fb950)" };
+  for (const [label, value, color] of labels) {
+    const pct = Math.min(100, (value / 8) * 100);
+    const div = document.createElement("div");
+    div.className = "bar";
+    div.innerHTML =
+      '<div class="lbl"><span>' + label + '</span><b>' + value.toFixed(3) + " B/B</b></div>" +
+      '<div class="track"><div class="fill" style="width:' + pct + "%;background:" + colors[color] + '"></div></div>';
+    bars.appendChild(div);
+  }
+  document.getElementById("entropy").innerHTML =
+    kv([["ground truth", d.entropy.truth_bits_per_byte + " B/B"]]);
+
+  // Hardening + identity
+  document.getElementById("hardening").innerHTML = kv([
+    ["polynomial degree", d.hardening.degree],
+    ["evaluations", d.hardening.evaluations],
+    ["poly points (first 8)", d.hardening.poly_points.join(", ")],
+    ["MAC prefix", hash(d.hardening.mac)],
+  ]);
+  document.getElementById("identity").innerHTML = kv([
+    ["node", d.identity.node_id],
+    ["window", d.identity.window_id],
+    ["nullifier", hash(d.identity.nullifier)],
+  ]);
+
+  // Certificate
+  document.getElementById("certificate").innerHTML = kv([
+    ["version", d.certificate.version],
+    ["body size", fmt(d.certificate.body_bytes) + " B"],
+    ["MAC (b64 prefix)", hash(d.certificate.mac_b64)],
+  ]);
+
+  // Transport
+  document.getElementById("transport").innerHTML = kv([
+    ["onion size", fmt(d.transport.onion_bytes) + " B"],
+    ["Reed-Solomon", d.transport.rs.k + " of " + d.transport.rs.n],
+    ["shards", d.transport.shards],
+    ["DTN delivered", d.transport.dtn_delivered + "/" + d.transport.shards],
+    ["DTN dropped", d.transport.dtn_dropped],
+  ]);
+  const route = document.getElementById("route");
+  route.innerHTML = d.transport.route
+    .map(function (h) { return '<span class="hop">' + h + "</span>"; })
+    .join('<span class="arrow">&rarr;</span>');
+
+  // Matching + settlement
+  document.getElementById("match-settle").innerHTML = kv([
+    ["bids", d.matching.bids],
+    ["offers", d.matching.offers],
+    ["crossed pairs", d.matching.crossed],
+    ["matched quantity", d.matching.total_quantity],
+    ["settlement price", d.settlement.price],
+    ["payee", d.settlement.payee],
+    ["payee balance", d.settlement.payee_balance],
+    ["nullifiers spent", d.settlement.spent_count],
+  ]);
+
+  document.getElementById("raw").textContent = JSON.stringify(d, null, 2);
+}
+
+function kv(rows) {
+  return rows.map(function (row) {
+    return "<dt>" + row[0] + "</dt><dd>" + row[1] + "</dd>";
+  }).join("");
+}
+function fmt(n) { return Number(n).toLocaleString("en-US"); }
+function hash(s) { return '<span class="hash">' + s + "</span>"; }
+
+getData().then(function (data) {
+  if (!data) {
+    const notice = document.createElement("div");
+    notice.className = "notice";
+    notice.innerHTML = "No pipeline data found. Generate a self-contained page with " +
+      "<code>py -m cli.e2e --dashboard dashboard/index.html</code>, or serve " +
+      "this directory over HTTP (data.json / data.js fallbacks are also picked up).";
+    document.querySelector("main").insertBefore(notice, document.querySelector("main").firstChild);
+  } else {
+    render(data);
+  }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+target/
+node_modules/
+.venv/
+__pycache__/
+.pytest_cache/
+*.tmp
+*.exe
+*.dll
+*.pdb
+*.rlib
+.freebuff/
+.reasonix/
+*reasonix*

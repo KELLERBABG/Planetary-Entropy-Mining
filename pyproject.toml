@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "planetary-entropy-mining"
+version = "0.1.0"
+description = "Harvest environmental entropy into cryptographic certificates: capture sim, SP 800-90B estimation, lattice-style hardening, nullifiers, erasure coding, onion framing, DTN mesh, dark pool, settlement."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "numpy>=1.26",
+    "scipy>=1.11",
+    "cryptography>=42",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8",
+]
+
+[tool.setuptools.packages.find]
+include = ["dsp*", "hardening*", "identity*", "erasure*", "net*", "cli*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+# Default run: everything except the slow NIST 90B estimators (fast dev loop).
+# Full CI run: `py -m pytest -m ""` (or `-m slow` for just the heavy ones).
+addopts = "-q -m 'not slow'"
+markers = [
+    "slow: heavy NIST SP 800-90B estimator tests (>10s each) — run with `-m slow`",
+]

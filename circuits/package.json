@@ -1,0 +1,14 @@
+{
+  "name": "planetary-entropy-mining-circuits",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Circom2 + snarkjs Groth16 zk-SNARK circuits for the Planetary Entropy Audit.",
+  "scripts": {
+    "toy:prove": "node scripts/toy_prove_verify.mjs --assert"
+  },
+  "dependencies": {
+    "circom2": "^0.2.23",
+    "circomlib": "^2.0.5",
+    "snarkjs": "^0.7.5"
+  }
+}

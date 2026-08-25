@@ -1,0 +1,134 @@
+window.PEM_DATA = {
+  "capture": {
+    "bytes": 48000,
+    "sample_rate": 48000.0,
+    "seconds": 1.0,
+    "source": "thermal"
+  },
+  "certificate": {
+    "body_bytes": 815,
+    "mac_b64": "PpaSqyMfvWmq",
+    "version": 1
+  },
+  "entropy": {
+    "conservative_min_bits_per_byte": 5.959866524539016,
+    "nist90b_bits_per_byte": 5.959866524539016,
+    "shannon_bits_per_byte": 7.042899893098178,
+    "truth_bits_per_byte": 7.046843354980835
+  },
+  "hardening": {
+    "degree": 31,
+    "evaluations": 64,
+    "mac": "76c99826f9a87f38",
+    "poly_points": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ]
+  },
+  "identity": {
+    "node_id": "demo-node-1",
+    "nullifier": "0b256ce488ecad0084162c0c0f2dd7add773faffc125fed54c69d03f193fe345",
+    "window_id": "2026-07-31T00:00Z"
+  },
+  "matching": {
+    "bids": 1,
+    "crossed": 2,
+    "offers": 2,
+    "total_quantity": 2
+  },
+  "overall": "PASS",
+  "pipeline": [
+    {
+      "detail": "thermal @ 48,000 Hz, 48000 bytes",
+      "ok": true,
+      "stage": "capture"
+    },
+    {
+      "detail": "shannon=7.043 B/B, 90B floor=5.960 B/B, truth=7.047 B/B",
+      "ok": true,
+      "stage": "entropy"
+    },
+    {
+      "detail": "degree=31, 64 evaluations",
+      "ok": true,
+      "stage": "harden"
+    },
+    {
+      "detail": "0b256ce488ecad0084162c0c... (node=demo-node-1)",
+      "ok": true,
+      "stage": "nullifier"
+    },
+    {
+      "detail": "v1, body=815B",
+      "ok": true,
+      "stage": "certificate"
+    },
+    {
+      "detail": "toy proof layout (window=42), 32B nullifier",
+      "ok": true,
+      "stage": "prove"
+    },
+    {
+      "detail": "3 hops, packet=1196B, payload=815B",
+      "ok": true,
+      "stage": "onion"
+    },
+    {
+      "detail": "Reed-Solomon 2/4, 4 shards",
+      "ok": true,
+      "stage": "shard"
+    },
+    {
+      "detail": "4/4 shards delivered (dropped=0)",
+      "ok": true,
+      "stage": "ship"
+    },
+    {
+      "detail": "4/4 shards -> 1196B onion",
+      "ok": true,
+      "stage": "reconstruct"
+    },
+    {
+      "detail": "payload recovered",
+      "ok": true,
+      "stage": "unwrap"
+    },
+    {
+      "detail": "2 crossed, vol=2",
+      "ok": true,
+      "stage": "match"
+    },
+    {
+      "detail": "nullifier spent={1760472403227428639}, payee balance=100",
+      "ok": true,
+      "stage": "settle"
+    }
+  ],
+  "settlement": {
+    "payee": "payee-node",
+    "payee_balance": 100,
+    "price": 100,
+    "spent_count": 1
+  },
+  "transport": {
+    "dtn_delivered": 4,
+    "dtn_dropped": 0,
+    "onion_bytes": 1196,
+    "route": [
+      "mix-a",
+      "mix-b",
+      "mix-c"
+    ],
+    "rs": {
+      "k": 2,
+      "n": 4
+    },
+    "shards": 4
+  }
+};
