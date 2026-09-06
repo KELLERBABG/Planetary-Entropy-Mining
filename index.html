@@ -586,13 +586,9 @@
         <p>Pure Python + Circom + Foundry suite. Zero external server dependencies.</p>
       </div>
 
-      <div class="code-window">
-git clone https://github.com/KELLERBABG/CosmicEntropy.git
-cd CosmicEntropy
-py -m pip install -e ".[dev]"
-py -m cli.validate
-cd circuits && npm install
-node scripts/toy_prove_verify.mjs --assert
+      <div class="code-container" style="position:relative;">
+        <pre class="code-window" id="pemCode" onclick="copyCode('pemCode', 'pemCopyStatus')" style="white-space:pre; cursor:pointer; margin:20px 0;" title="Click to copy commands">git clone https://github.com/KELLERBABG/CosmicEntropy.git && cd CosmicEntropy && py -m pip install -e ".[dev]" && py -m cli.validate && cd circuits && npm install && node scripts/toy_prove_verify.mjs --assert</pre>
+        <span id="pemCopyStatus" style="position:absolute; top:30px; right:20px; font-family:var(--font-mono); font-size:11px; background:rgba(16,185,129,0.15); border:1px solid var(--emerald); color:var(--emerald); padding:4px 8px; border-radius:4px; pointer-events:none; opacity:0.8; transition:all 0.2s;">CLICK TO COPY</span>
       </div>
 
       <div style="display: flex; gap: 12px;">
@@ -698,6 +694,22 @@ node scripts/toy_prove_verify.mjs --assert
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
     });
+
+    function copyCode(elementId, statusId) {
+      const el = document.getElementById(elementId);
+      const status = document.getElementById(statusId);
+      const text = el.textContent.trim();
+      navigator.clipboard.writeText(text).then(() => {
+        status.textContent = 'COPIED TO CLIPBOARD!';
+        status.style.background = '#10b981';
+        status.style.color = '#000';
+        setTimeout(() => {
+          status.textContent = 'CLICK TO COPY';
+          status.style.background = 'rgba(16,185,129,0.15)';
+          status.style.color = 'var(--emerald)';
+        }, 2200);
+      });
+    }
 
     // 2D Live DSP Oscilloscope simulation
     const dspCanvas = document.getElementById('dspCanvas');
