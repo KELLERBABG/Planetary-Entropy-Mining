@@ -587,15 +587,10 @@
       </div>
 
       <div class="code-window">
-# 1. Install reference environment & dev suite
 git clone https://github.com/KELLERBABG/CosmicEntropy.git
 cd CosmicEntropy
 py -m pip install -e ".[dev]"
-
-# 2. Run NIST SP 800-90B statistical estimation suite
 py -m cli.validate
-
-# 3. Compile Circom circuit, generate witness & verify Groth16 proof
 cd circuits && npm install
 node scripts/toy_prove_verify.mjs --assert
       </div>
