@@ -1,7 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Planetary Entropy Mining">
-  <rect width="64" height="64" fill="#14171a"/>
-  <rect x="1.5" y="1.5" width="61" height="61" fill="none" stroke="#2a3136" stroke-width="3"/>
-  <path d="M8 40 L14 30 L19 44 L24 26 L29 46 L34 28 L39 42 L45 32 L50 40 L56 34" fill="none"
-        stroke="#5cff9d" stroke-width="2.4" stroke-linejoin="round"/>
-  <line x1="8" y1="22" x2="56" y2="22" stroke="#2f6b4a" stroke-width="1.6"/>
+  <rect width="64" height="64" fill="#15120e"/>
+  <rect x="1.5" y="1.5" width="61" height="61" fill="none" stroke="#332a21" stroke-width="3"/>
+  <path d="M8 41 L14 31 L19 45 L24 27 L29 47 L34 29 L39 43 L45 33 L50 41 L56 35" fill="none"
+        stroke="#8ed081" stroke-width="2.4" stroke-linejoin="round"/>
+  <path d="M8 24 C18 20 30 28 42 23 C48 20 53 22 56 20" fill="none" stroke="#5a4a38" stroke-width="1.6"/>
+  <path d="M8 17 C20 13 32 21 44 16 C50 13 54 15 56 13" fill="none" stroke="#443729" stroke-width="1.4"/>
 </svg>
