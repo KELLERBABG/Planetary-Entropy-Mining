@@ -128,6 +128,30 @@ pre .c{color:var(--dim)}
 .js [data-reveal].in{opacity:1;transform:none}
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.js [data-reveal]{opacity:1;transform:none;transition:none}}
 @media (max-width:840px){.navlinks a:not(.btn){display:none}}
+
+/* ---- the pipeline, as a running chain ------------------------------- */
+.flow{position:relative;padding-left:36px}
+.flowrail{position:absolute;left:10px;top:10px;bottom:34px;width:1px;background:var(--line)}
+.pulse{position:absolute;left:-4px;top:0;width:9px;height:9px;border-radius:50%;background:var(--flux);
+  box-shadow:0 0 16px 4px rgba(142,208,129,.4);transition:transform .55s var(--ease);will-change:transform}
+.stations{list-style:none;margin:0;padding:0}
+.st{display:grid;grid-template-columns:2.3rem 1fr;gap:.9rem;padding:.8rem .9rem .8rem 0;border-bottom:1px solid var(--line-soft);
+  border-left:2px solid transparent;opacity:.34;transition:opacity .35s var(--ease),background-color .35s var(--ease),border-color .35s var(--ease),transform .35s var(--ease)}
+.st.on{opacity:1;background:rgba(142,208,129,.06);border-left-color:var(--flux);transform:translateX(2px)}
+.st.on p{color:var(--chalk)}
+.st .sn{font-family:var(--mono);font-size:.7rem;color:var(--dim);padding-top:.2rem;transition:color .35s var(--ease)}
+.st.on .sn{color:var(--flux)}
+.st b{display:block;font-weight:600;color:var(--chalk);font-size:1.02rem;transition:color .35s var(--ease)}
+.st.on b{color:var(--flux)}
+.st code{display:block;font-family:var(--mono);font-size:.68rem;color:var(--dim);margin-top:.1rem}
+.st p{margin:.25rem 0 0;font-size:.88rem;line-height:1.55;color:var(--steel);max-width:74ch}
+.flowcap{margin:1rem 0 0;font-family:var(--mono);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
+@media (prefers-reduced-motion:reduce){.st{opacity:1}.pulse{display:none}}
+
+.motion-toggle{font-family:var(--mono);font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;background:transparent;
+  color:var(--steel);border:1px solid var(--line);padding:.5em .7em;cursor:pointer;transition:background-color .18s,color .18s,border-color .18s}
+.motion-toggle:hover{border-color:var(--flux);color:var(--flux)}
+.motion-toggle[aria-pressed="true"]{background:var(--flux);border-color:var(--flux);color:var(--flux-ink)}
 </style>
 </head>
 <body>
@@ -151,6 +175,7 @@ pre .c{color:var(--dim)}
       <a href="#pipeline">Pipeline</a>
       <a href="#proof">Proof</a>
       <a href="#limits">Limits</a>
+      <button class="motion-toggle" id="motionToggle" type="button" aria-pressed="false" title="Run the pipeline animation">Motion: off</button>
       <a class="btn" href="https://github.com/KELLERBABG/Planetary-Entropy-Mining" target="_blank" rel="noopener noreferrer">Source &#8599;</a>
     </nav>
   </div>
@@ -242,18 +267,35 @@ pre .c{color:var(--dim)}
         <h2>The pipeline</h2>
         <span class="mono">02 &middot; Eleven modules, thirteen stages</span>
       </div>
-      <div class="stages">
-        <div class="stage" data-reveal><span class="n">01</span><div><h3>Capture</h3><p>Thermal, RF and seismic noise, each a seeded simulator with known statistical ground truth.</p><code>dsp/capture.py</code></div></div>
-        <div class="stage" data-reveal><span class="n">02</span><div><h3>Estimation</h3><p>Min-entropy estimated from the window, with the estimator ordering H&#8329;&#8320;&#8320;&#8329; &ge; H&#8341;&#8341;&#8349; &ge; H&#8347;&#8346;&#8336;&#8345;&#8345;&#8346;&#8345; checked.</p><code>dsp/nist800_90b.py &middot; dsp/analysis.py</code></div></div>
-        <div class="stage" data-reveal><span class="n">03</span><div><h3>Validation</h3><p>Estimators compared against closed-form quantiser truth on the simulator.</p><code>dsp/validation.py</code></div></div>
-        <div class="stage" data-reveal><span class="n">04</span><div><h3>Hardening</h3><p>The window is folded into a polynomial over GF(256). A flipped byte fails verification.</p><code>hardening/gf256.py &middot; polynomial.py</code></div></div>
-        <div class="stage" data-reveal><span class="n">05</span><div><h3>Nullifier</h3><p>Deterministic per node and per window, so one measurement can be claimed once.</p><code>identity/nullifier.py</code></div></div>
-        <div class="stage" data-reveal><span class="n">06</span><div><h3>Certificate</h3><p>Versioned, MAC-signed and byte-deterministic, so two runs serialise identically.</p><code>identity/certificate.py</code></div></div>
-        <div class="stage" data-reveal><span class="n">07</span><div><h3>Proof</h3><p>The min-entropy gate, compiled to an r1cs and proven with Groth16.</p><code>circuits/entropy_audit_poly.circom</code></div></div>
-        <div class="stage" data-reveal><span class="n">08</span><div><h3>Framing</h3><p>Onion layers over X25519 and AES-GCM, so a relay learns neither origin nor destination.</p><code>net/sphinx.py</code></div></div>
-        <div class="stage" data-reveal><span class="n">09</span><div><h3>Sharding</h3><p>Reed&ndash;Solomon k-of-n over the same GF(256), verified across every subset.</p><code>erasure/reedsolomon.py</code></div></div>
-        <div class="stage" data-reveal><span class="n">10</span><div><h3>Delivery</h3><p>Discrete-time delay-tolerant mesh: intermittent links, duplicate suppression, TTL expiry.</p><code>net/dtn.py</code></div></div>
-        <div class="stage" data-reveal><span class="n">11</span><div><h3>Matching and settlement</h3><p>Blind crossing in the dark pool, then atomic pay-once-per-nullifier on chain.</p><code>net/darkpool.py &middot; contracts/</code></div></div>
+      <div class="flow" id="flow">
+        <div class="flowrail" aria-hidden="true"><span class="pulse" id="pulse"></span></div>
+        <ol class="stations">
+        <li class="st"><span class="sn">01</span>
+          <div><b>Capture</b><code>dsp/capture.py</code><p>Thermal, RF and seismic noise, each a seeded simulator with known statistical ground truth.</p></div></li>
+        <li class="st"><span class="sn">02</span>
+          <div><b>Estimate</b><code>dsp/nist800_90b.py</code><p>Min-entropy from a 256-bin histogram of the window, with the estimator ordering checked.</p></div></li>
+        <li class="st"><span class="sn">03</span>
+          <div><b>Validate</b><code>dsp/validation.py</code><p>Estimators compared against closed-form quantiser truth rather than assumed.</p></div></li>
+        <li class="st"><span class="sn">04</span>
+          <div><b>Harden</b><code>hardening/polynomial.py</code><p>The window folded into a polynomial over GF(256). A flipped byte fails verification.</p></div></li>
+        <li class="st"><span class="sn">05</span>
+          <div><b>Nullify</b><code>identity/nullifier.py</code><p>Deterministic per node and per window, so one measurement can be claimed once.</p></div></li>
+        <li class="st"><span class="sn">06</span>
+          <div><b>Certify</b><code>identity/certificate.py</code><p>Versioned, MAC-signed and byte-deterministic, so two runs serialise identically.</p></div></li>
+        <li class="st"><span class="sn">07</span>
+          <div><b>Prove</b><code>circuits/entropy_audit_poly.circom</code><p>The min-entropy gate: the most common bin bounded, the nullifier bound to the commitment.</p></div></li>
+        <li class="st"><span class="sn">08</span>
+          <div><b>Frame</b><code>net/sphinx.py</code><p>Onion layers over X25519 and AES-GCM, so a relay learns neither origin nor destination.</p></div></li>
+        <li class="st"><span class="sn">09</span>
+          <div><b>Shard</b><code>erasure/reedsolomon.py</code><p>Reed-Solomon k-of-n over the same GF(256), verified across every subset.</p></div></li>
+        <li class="st"><span class="sn">10</span>
+          <div><b>Carry</b><code>net/dtn.py</code><p>Discrete-time delay-tolerant mesh: intermittent links, duplicate suppression, TTL expiry.</p></div></li>
+        <li class="st"><span class="sn">11</span>
+          <div><b>Match</b><code>net/darkpool.py</code><p>Blind crossing in the dark pool, with additive homomorphism over shares.</p></div></li>
+        <li class="st"><span class="sn">12</span>
+          <div><b>Settle</b><code>contracts/EntropySettlement.sol</code><p>Atomic pay-once-per-nullifier, with the contract as the authoritative specification.</p></div></li>
+        </ol>
+        <p class="flowcap">The pulse walks the chain once every eighteen seconds. Point at a stage to hold it there. Motion follows your system, and the switch above overrides it.</p>
       </div>
     </div>
   </section>
@@ -385,6 +427,53 @@ node circuits/scripts/entropy_poly_prove.mjs --assert</pre>
     entries.forEach(function(e){ if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
   }, { rootMargin: '0px 0px -10% 0px', threshold: 0.05 });
   items.forEach(function(el, i){ el.style.setProperty('--d', ((i % 6) * 70) + 'ms'); io.observe(el); });
+})();
+</script>
+
+<script>
+(function(){
+  var flow = document.getElementById('flow');
+  if (!flow) return;
+  var sts = Array.prototype.slice.call(flow.querySelectorAll('.st'));
+  var pulse = document.getElementById('pulse');
+  var sysReduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var toggle = document.getElementById('motionToggle');
+  var on = !sysReduce;
+  var i = 0, timer = null;
+
+  function setMotion(state){
+    on = state;
+    if (toggle) { toggle.setAttribute('aria-pressed', String(on)); toggle.textContent = 'Motion: ' + (on ? 'on' : 'off'); }
+    if (pulse) pulse.style.display = on ? '' : 'none';
+    if (!on) { sts.forEach(function(s){ s.classList.add('on'); }); clearInterval(timer); timer = null; }
+    else { show(i); start(); }
+  }
+  function start(){
+    if (!on || timer) return;
+    timer = setInterval(function(){ show(i + 1); }, 1500);
+  }
+  function stop(){ clearInterval(timer); timer = null; }
+
+  function show(n){
+    i = (n + sts.length) % sts.length;
+    sts.forEach(function(s, k){ s.classList.toggle('on', k === i); });
+    var s = sts[i];
+    pulse.style.transform = 'translateY(' + (s.offsetTop + s.offsetHeight / 2) + 'px)';
+  }
+  if (sts.length === 0) return;
+  if (toggle) { toggle.addEventListener('click', function(){ setMotion(!on); }); }
+  sts.forEach(function(s, k){ s.addEventListener('mouseenter', function(){ show(k); }); });
+  if ('IntersectionObserver' in window) {
+    new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if (e.isIntersecting) { start(); } else { stop(); }
+      });
+    }, { threshold: 0.2 }).observe(flow);
+  } else {
+    timer = setInterval(function(){ show(i + 1); }, 1500);
+  }
+  window.addEventListener('resize', function(){ if (on) show(i); });
+  setMotion(on);
 })();
 </script>
 </body>
