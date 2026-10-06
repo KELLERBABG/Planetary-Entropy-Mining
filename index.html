@@ -113,7 +113,7 @@ p{margin:0 0 1rem}
 .limits li:last-child{border-bottom:0}
 .limits b{color:var(--chalk);font-weight:500}
 
-pre{margin:0;background:var(--panel-2);border:1px solid var(--line);border-left:2px solid var(--flux);padding:1.25rem 1.35rem;overflow-x:auto;font-family:var(--mono);font-size:.78rem;line-height:1.95;color:var(--chalk)}
+pre{margin:0;background:var(--panel-2);border:1px solid var(--line);border-left:2px solid var(--flux);padding:1.25rem 1.35rem;overflow-x:auto;font-family:var(--mono);font-size:.72rem;line-height:1.95;color:var(--chalk)}
 pre .c{color:var(--dim)}
 
 .foot{border-top:1px solid var(--line);padding-block:2.4rem;background:var(--panel)}
@@ -212,6 +212,16 @@ pre .c{color:var(--dim)}
   color:var(--steel);border:1px solid var(--line);padding:.5em .7em;cursor:pointer;transition:background-color .18s,color .18s,border-color .18s}
 .motion-toggle:hover{border-color:var(--flux);color:var(--flux)}
 .motion-toggle[aria-pressed="true"]{background:var(--flux);border-color:var(--flux);color:var(--flux-ink)}
+
+/* ---- scrollbars, in the site's own colours --------------------------- */
+html{scrollbar-color:#3a3226 #1b1710;scrollbar-width:thin}
+::-webkit-scrollbar{width:12px;height:12px}
+::-webkit-scrollbar-track{background:#1b1710}
+::-webkit-scrollbar-thumb{background:#3a3226;border:3px solid #1b1710}
+::-webkit-scrollbar-thumb:hover{background:#8ed081}
+::-webkit-scrollbar-corner{background:#1b1710}
+/* ---- code wraps rather than scrolling sideways ---------------------- */
+pre{white-space:pre-wrap;overflow-wrap:anywhere;overflow-x:hidden}
 </style>
 </head>
 <body>
