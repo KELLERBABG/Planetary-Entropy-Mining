@@ -129,24 +129,79 @@ pre .c{color:var(--dim)}
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.js [data-reveal]{opacity:1;transform:none;transition:none}}
 @media (max-width:840px){.navlinks a:not(.btn){display:none}}
 
-/* ---- the pipeline, as a running chain ------------------------------- */
-.flow{position:relative;padding-left:36px}
-.flowrail{position:absolute;left:10px;top:10px;bottom:34px;width:1px;background:var(--line)}
-.pulse{position:absolute;left:-4px;top:0;width:9px;height:9px;border-radius:50%;background:var(--flux);
-  box-shadow:0 0 16px 4px rgba(142,208,129,.4);transition:transform .55s var(--ease);will-change:transform}
-.stations{list-style:none;margin:0;padding:0}
-.st{display:grid;grid-template-columns:2.3rem 1fr;gap:.9rem;padding:.8rem .9rem .8rem 0;border-bottom:1px solid var(--line-soft);
-  border-left:2px solid transparent;opacity:.34;transition:opacity .35s var(--ease),background-color .35s var(--ease),border-color .35s var(--ease),transform .35s var(--ease)}
-.st.on{opacity:1;background:rgba(142,208,129,.06);border-left-color:var(--flux);transform:translateX(2px)}
-.st.on p{color:var(--chalk)}
-.st .sn{font-family:var(--mono);font-size:.7rem;color:var(--dim);padding-top:.2rem;transition:color .35s var(--ease)}
-.st.on .sn{color:var(--flux)}
-.st b{display:block;font-weight:600;color:var(--chalk);font-size:1.02rem;transition:color .35s var(--ease)}
-.st.on b{color:var(--flux)}
-.st code{display:block;font-family:var(--mono);font-size:.68rem;color:var(--dim);margin-top:.1rem}
-.st p{margin:.25rem 0 0;font-size:.88rem;line-height:1.55;color:var(--steel);max-width:74ch}
+/* ---- the pipeline: a console of five acts --------------------------- */
+.console{margin-top:.4rem}
+.crail{position:relative;height:2px;background:var(--line);margin-bottom:1.6rem}
+.cfill{position:absolute;left:0;top:0;height:2px;background:var(--flux);width:20%;
+  transition:width .7s var(--ease);box-shadow:0 0 12px 1px rgba(142,208,129,.5)}
+.acts{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:1px;
+  background:var(--line);border:1px solid var(--line)}
+.act{background:var(--ground);padding:1.1rem 1rem 1.2rem;position:relative;
+  transition:background-color .45s var(--ease),opacity .45s var(--ease);opacity:.42}
+.act.on{background:var(--panel-2);opacity:1}
+.act .anum{position:absolute;top:.85rem;right:.9rem;font-family:var(--mono);font-size:.66rem;color:var(--dim);
+  transition:color .45s var(--ease)}
+.act.on .anum{color:var(--flux)}
+.act h3{font-size:.95rem;line-height:1.2;margin:0 0 .9rem;padding-right:1.6rem;color:var(--haze);
+  transition:color .45s var(--ease)}
+.act.on h3{color:var(--chalk)}
+.glyph{border:1px solid var(--line);background:rgba(0,0,0,.28);margin-bottom:.9rem}
+.glyph svg{display:block;width:100%;height:auto}
+.glyph .wave{fill:none;stroke:var(--flux);stroke-width:1.3;opacity:.85}
+.glyph .bars rect{fill:var(--dim);opacity:.55}
+.glyph .gate{stroke:var(--flux);stroke-width:1;stroke-dasharray:5 4;opacity:.7}
+.glyph .grid line{stroke:var(--line);stroke-width:.8}
+.glyph .curve{fill:none;stroke:var(--flux);stroke-width:1.6}
+.glyph .pts circle{fill:var(--flux)}
+.glyph .doc{fill:none;stroke:var(--chalk);stroke-width:1.3;opacity:.75}
+.glyph .lines line{stroke:var(--dim);stroke-width:1.2}
+.glyph .seal{fill:none;stroke:var(--flux);stroke-width:1.4}
+.glyph .hash{stroke:var(--dim);stroke-width:1.6;stroke-dasharray:4 3}
+.glyph .onion path{fill:none;stroke:var(--dim);stroke-width:1.3}
+.glyph .pt{fill:var(--flux)}
+.glyph .shards rect{fill:var(--flux);opacity:.35}
+.glyph .mesh line{stroke:var(--dim);stroke-width:1.1;stroke-dasharray:4 3}
+.glyph .nodes circle{fill:var(--ground);stroke:var(--flux);stroke-width:1.4}
+.glyph .ledger{fill:none;stroke:var(--chalk);stroke-width:1.3;opacity:.75}
+.glyph .check{fill:none;stroke:var(--flux);stroke-width:1.8}
+.act.on .glyph .bars rect{opacity:1;background:var(--flux)}
+.act.on .glyph{background:rgba(142,208,129,.06)}
+.mods{list-style:none;margin:0;padding:0}
+.mods li{padding:.3rem 0;border-top:1px solid var(--line-soft)}
+.mods li:first-child{border-top:0}
+.mods code{display:block;font-family:var(--mono);font-size:.63rem;color:var(--dim);overflow-wrap:anywhere;line-height:1.5}
+.act.on .mods code{color:var(--flux)}
+.mods span{display:block;font-size:.76rem;color:var(--haze);line-height:1.45}
+.cread{border:1px solid var(--line);border-top:0;background:var(--panel);padding:1.1rem 1.2rem}
+.cread b{display:block;color:var(--chalk);font-size:1.06rem}
+.cread span{display:block;font-family:var(--mono);font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--flux);margin:.25rem 0 .7rem}
+.cread p{margin:0;font-size:.92rem;color:var(--haze);max-width:96ch}
 .flowcap{margin:1rem 0 0;font-family:var(--mono);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
-@media (prefers-reduced-motion:reduce){.st{opacity:1}.pulse{display:none}}
+/* the glyph animates when its act is reached */
+@media (prefers-reduced-motion:no-preference){
+  .act.on .glyph .wave{stroke-dasharray:420;stroke-dashoffset:420;animation:draw 1.5s var(--ease) forwards}
+  .act.on .glyph .bars rect{transform-origin:center bottom;animation:grow .6s var(--ease) backwards}
+  .act.on .glyph .bars rect:nth-child(2){animation-delay:.06s}
+  .act.on .glyph .bars rect:nth-child(3){animation-delay:.12s}
+  .act.on .glyph .bars rect:nth-child(4){animation-delay:.18s}
+  .act.on .glyph .bars rect:nth-child(5){animation-delay:.24s}
+  .act.on .glyph .bars rect:nth-child(6){animation-delay:.3s}
+  .act.on .glyph .curve{stroke-dasharray:400;stroke-dashoffset:400;animation:draw 1.6s var(--ease) forwards}
+  .act.on .glyph .doc,.act.on .glyph .ledger{stroke-dasharray:420;stroke-dashoffset:420;animation:draw 1.2s var(--ease) forwards}
+  .act.on .glyph .seal{animation:pop .7s var(--ease) .4s backwards}
+  .act.on .glyph .shards rect{animation:split .9s var(--ease) forwards}
+  .act.on .glyph .mesh line{animation:draw 1.2s var(--ease) forwards}
+  .act.on .glyph .nodes circle{animation:pop .6s var(--ease) backwards}
+  .act.on .glyph .check{stroke-dasharray:60;stroke-dashoffset:60;animation:draw .8s var(--ease) .3s forwards}
+}
+@keyframes draw{to{stroke-dashoffset:0}}
+@keyframes grow{from{transform:scaleY(.15)}}
+@keyframes pop{from{transform:scale(.2);opacity:0}}
+@keyframes split{from{transform:translateX(-22px)}}
+@media (prefers-reduced-motion:reduce){.act{opacity:1}.cfill{transition:none}}
+@media (max-width:1080px){.acts{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:620px){.acts{grid-template-columns:minmax(0,1fr)}}
 
 .motion-toggle{font-family:var(--mono);font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;background:transparent;
   color:var(--steel);border:1px solid var(--line);padding:.5em .7em;cursor:pointer;transition:background-color .18s,color .18s,border-color .18s}
@@ -267,88 +322,71 @@ pre .c{color:var(--dim)}
         <h2>The pipeline</h2>
         <span class="mono">02 &middot; Eleven modules, thirteen stages</span>
       </div>
-      <div class="flow" id="flow">
-        <div class="flowrail" aria-hidden="true"><span class="pulse" id="pulse"></span></div>
-        <ol class="stations">
-        <li class="st"><span class="sn">01</span>
-          <div><b>Capture</b><code>dsp/capture.py</code><p>Thermal, RF and seismic noise, each a seeded simulator with known statistical ground truth.</p></div></li>
-        <li class="st"><span class="sn">02</span>
-          <div><b>Estimate</b><code>dsp/nist800_90b.py</code><p>Min-entropy from a 256-bin histogram of the window, with the estimator ordering checked.</p></div></li>
-        <li class="st"><span class="sn">03</span>
-          <div><b>Validate</b><code>dsp/validation.py</code><p>Estimators compared against closed-form quantiser truth rather than assumed.</p></div></li>
-        <li class="st"><span class="sn">04</span>
-          <div><b>Harden</b><code>hardening/polynomial.py</code><p>The window folded into a polynomial over GF(256). A flipped byte fails verification.</p></div></li>
-        <li class="st"><span class="sn">05</span>
-          <div><b>Nullify</b><code>identity/nullifier.py</code><p>Deterministic per node and per window, so one measurement can be claimed once.</p></div></li>
-        <li class="st"><span class="sn">06</span>
-          <div><b>Certify</b><code>identity/certificate.py</code><p>Versioned, MAC-signed and byte-deterministic, so two runs serialise identically.</p></div></li>
-        <li class="st"><span class="sn">07</span>
-          <div><b>Prove</b><code>circuits/entropy_audit_poly.circom</code><p>The min-entropy gate: the most common bin bounded, the nullifier bound to the commitment.</p></div></li>
-        <li class="st"><span class="sn">08</span>
-          <div><b>Frame</b><code>net/sphinx.py</code><p>Onion layers over X25519 and AES-GCM, so a relay learns neither origin nor destination.</p></div></li>
-        <li class="st"><span class="sn">09</span>
-          <div><b>Shard</b><code>erasure/reedsolomon.py</code><p>Reed-Solomon k-of-n over the same GF(256), verified across every subset.</p></div></li>
-        <li class="st"><span class="sn">10</span>
-          <div><b>Carry</b><code>net/dtn.py</code><p>Discrete-time delay-tolerant mesh: intermittent links, duplicate suppression, TTL expiry.</p></div></li>
-        <li class="st"><span class="sn">11</span>
-          <div><b>Match</b><code>net/darkpool.py</code><p>Blind crossing in the dark pool, with additive homomorphism over shares.</p></div></li>
-        <li class="st"><span class="sn">12</span>
-          <div><b>Settle</b><code>contracts/EntropySettlement.sol</code><p>Atomic pay-once-per-nullifier, with the contract as the authoritative specification.</p></div></li>
-        </ol>
-        <p class="flowcap">The pulse walks the chain once every eighteen seconds. Point at a stage to hold it there. Motion follows your system, and the switch above overrides it.</p>
+      <div class="console" id="console">
+      <div class="crail"><span class="cfill" id="cfill"></span></div>
+      <ol class="acts">
+      <li class="act" data-title="Capture &amp; measure" data-sub="a window of noise becomes a number" data-body="Thermal, RF and seismic noise is captured as a window, reduced to a 256-bin histogram, and estimated with the NIST SP 800-90B estimators. The estimator ordering is checked against closed-form truth rather than assumed.">
+        <span class="anum">01</span>
+        <h3>Capture &amp; measure</h3>
+        <div class="glyph"><svg viewBox="0 0 200 110" aria-hidden="true"><path class="wave" d="M6 62 L16 44 L26 74 L36 38 L46 78 L56 46 L66 70 L76 42 L86 76 L96 48 L106 68 L116 44 L126 74 L136 50 L146 66 L156 46 L166 72 L176 52 L186 64 L194 54"/>
+      <g class="bars">
+        <rect x="20" y="86" width="12" height="14"/><rect x="38" y="80" width="12" height="20"/>
+        <rect x="56" y="90" width="12" height="10"/><rect x="74" y="76" width="12" height="24"/>
+        <rect x="92" y="84" width="12" height="16"/><rect x="110" y="92" width="12" height="8"/>
+      </g>
+      <line class="gate" x1="6" y1="94" x2="194" y2="94"/></svg></div>
+        <ul class="mods"><li><code>dsp/capture.py</code><span>seeded noise, known truth</span></li><li><code>dsp/nist800_90b.py</code><span>min-entropy estimate</span></li><li><code>dsp/validation.py</code><span>ordering verified</span></li></ul>
+      </li>
+      <li class="act" data-title="Harden &amp; prove" data-sub="the number becomes a proof" data-body="The window is folded into a polynomial over GF(256), and a zero-knowledge circuit proves the min-entropy gate: the most common histogram bin is bounded, and the public nullifier is bound to the commitment.">
+        <span class="anum">02</span>
+        <h3>Harden &amp; prove</h3>
+        <div class="glyph"><svg viewBox="0 0 200 110" aria-hidden="true"><g class="grid">
+        <line x1="6" y1="30" x2="194" y2="30"/><line x1="6" y1="60" x2="194" y2="60"/><line x1="6" y1="90" x2="194" y2="90"/>
+        <line x1="50" y1="16" x2="50" y2="104"/><line x1="100" y1="16" x2="100" y2="104"/><line x1="150" y1="16" x2="150" y2="104"/>
+      </g>
+      <path class="curve" d="M6 96 C 50 96, 60 34, 100 30 S 150 60, 194 58"/>
+      <g class="pts"><circle cx="40" cy="62" r="3"/><circle cx="100" cy="30" r="3"/><circle cx="160" cy="52" r="3"/></g>
+      <line class="gate" x1="6" y1="20" x2="194" y2="20"/></svg></div>
+        <ul class="mods"><li><code>hardening/polynomial.py</code><span>GF(256) commitment</span></li><li><code>circuits/entropy_audit_poly.circom</code><span>the gate, compiled</span></li></ul>
+      </li>
+      <li class="act" data-title="Certify &amp; bind" data-sub="the proof becomes a document" data-body="A deterministic nullifier is derived per node and per window so one measurement can be claimed once, and the certificate is versioned, MAC-signed and byte-deterministic: two runs serialise identically.">
+        <span class="anum">03</span>
+        <h3>Certify &amp; bind</h3>
+        <div class="glyph"><svg viewBox="0 0 200 110" aria-hidden="true"><rect class="doc" x="34" y="18" width="132" height="74" rx="2"/>
+      <g class="lines"><line x1="46" y1="36" x2="150" y2="36"/><line x1="46" y1="50" x2="150" y2="50"/><line x1="46" y1="64" x2="112" y2="64"/></g>
+      <circle class="seal" cx="150" cy="78" r="9"/>
+      <path class="hash" d="M34 100 H166"/></svg></div>
+        <ul class="mods"><li><code>identity/nullifier.py</code><span>once per window</span></li><li><code>identity/certificate.py</code><span>signed, versioned</span></li></ul>
+      </li>
+      <li class="act" data-title="Frame &amp; shard" data-sub="the document becomes pieces that travel" data-body="Onion layers over X25519 and AES-GCM mean a relay learns neither origin nor destination, and Reed-Solomon k-of-n erasure coding over the same field means any sufficient subset rebuilds the whole.">
+        <span class="anum">04</span>
+        <h3>Frame &amp; shard</h3>
+        <div class="glyph"><svg viewBox="0 0 200 110" aria-hidden="true"><g class="onion"><path d="M46 60 a30 30 0 0 1 60 0" /><path d="M30 60 a46 46 0 0 1 92 0" opacity=".55"/><path d="M14 60 a62 62 0 0 1 124 0" opacity=".3"/></g>
+      <circle class="pt" cx="76" cy="60" r="4"/>
+      <g class="shards"><rect x="124" y="30" width="16" height="46"/><rect x="148" y="38" width="12" height="30"/><rect x="168" y="46" width="8" height="14"/></g></svg></div>
+        <ul class="mods"><li><code>net/sphinx.py</code><span>onion layers</span></li><li><code>erasure/reedsolomon.py</code><span>k-of-n shards</span></li></ul>
+      </li>
+      <li class="act" data-title="Carry &amp; settle" data-sub="the pieces arrive, and settle once" data-body="Shards cross a delay-tolerant mesh with intermittent links, duplicate suppression and TTL expiry, cross blindly in the dark pool, and settle atomically once per nullifier against the contract.">
+        <span class="anum">05</span>
+        <h3>Carry &amp; settle</h3>
+        <div class="glyph"><svg viewBox="0 0 200 110" aria-hidden="true"><g class="mesh">
+        <line x1="20" y1="40" x2="70" y2="26"/><line x1="70" y1="26" x2="120" y2="48"/>
+        <line x1="20" y1="80" x2="70" y2="26"/><line x1="70" y1="26" x2="120" y2="86"/>
+        <line x1="120" y1="48" x2="120" y2="86"/>
+      </g>
+      <g class="nodes"><circle cx="20" cy="40" r="5"/><circle cx="70" cy="26" r="6"/><circle cx="120" cy="48" r="5"/><circle cx="20" cy="80" r="5"/><circle cx="120" cy="86" r="5"/></g>
+      <rect class="ledger" x="146" y="40" width="44" height="34" rx="2"/>
+      <path class="check" d="M154 57 l8 8 l16 -18"/></svg></div>
+        <ul class="mods"><li><code>net/dtn.py</code><span>intermittent mesh</span></li><li><code>net/darkpool.py</code><span>blind crossing</span></li><li><code>contracts/EntropySettlement.sol</code><span>pay once per nullifier</span></li></ul>
+      </li>
+      </ol>
+      <div class="cread">
+        <b id="actTitle">Capture &amp; measure</b>
+        <span id="actSub">a window of noise becomes a number</span>
+        <p id="actBody">Thermal, RF and seismic noise is captured as a window, reduced to a 256-bin histogram, and estimated with the NIST SP 800-90B estimators. The estimator ordering is checked against closed-form truth rather than assumed.</p>
       </div>
+      <p class="flowcap">The run walks the five acts once every twenty seconds. Point at an act to hold it. Motion follows your system, and the switch above overrides it.</p>
     </div>
-  </section>
-
-  <section class="section" id="proof">
-    <div class="wrap">
-      <div class="sec-head">
-        <h2>What the circuit proves</h2>
-        <span class="mono">03 &middot; The gate</span>
-      </div>
-      <div class="proof">
-        <div data-reveal>
-          <div class="mono-block">
-<span class="c">// stated in the circuit header</span>
-I know a 256-bin histogram of 2^16 quantised
-samples whose most common symbol occurs at
-most 512 times &mdash; hence the per-symbol
-min-entropy is at least
-
-  -log2(512 / 65536) = 7 bits
-
-and a 64-byte GF(256) hardening-polynomial
-commitment, and a node secret, such that the
-public nullifier equals
-
-  Poseidon(secret, node_secret, p_commit).
-          </div>
-          <p style="margin-top:1.3rem">
-            The gate is enforced twice over: every bin count must stay under <b style="color:var(--chalk)">max_count</b>,
-            and <b style="color:var(--chalk)">max_count &times; 2<sup>T</sup></b> must stay under the sample count. Lowering
-            the bound below the true maximum breaks the first check, and raising it breaks the second, so a prover
-            has no room to move.
-          </p>
-        </div>
-        <div data-reveal>
-          <div class="hist">
-            <svg viewBox="0 0 500 160" role="img" aria-label="Sixteen histogram bins with the gate line drawn above the tallest bin.">
-              <line class="g" x1="6" y1="6" x2="494" y2="6"/>
-              <text class="hl" x="8" y="0">max_count</text>
-              <rect x="10" y="61" width="20" height="59"/><rect x="40" y="83" width="20" height="37"/><rect x="70" y="52" width="20" height="68"/><rect x="100" y="96" width="20" height="24"/><rect x="130" y="93" width="20" height="27"/><rect x="160" y="34" width="20" height="86"/><rect x="190" y="16" width="20" height="104"/><rect x="220" y="56" width="20" height="64"/><rect x="250" y="28" width="20" height="92"/><rect x="280" y="95" width="20" height="25"/><rect x="310" y="38" width="20" height="82"/><rect x="340" y="75" width="20" height="45"/><rect x="370" y="98" width="20" height="22"/><rect x="400" y="91" width="20" height="29"/><rect x="430" y="47" width="20" height="73"/><rect x="460" y="49" width="20" height="71"/>
-              <line x1="6" y1="120" x2="494" y2="120" stroke="rgba(190,210,220,.3)" stroke-width="1"/>
-              <text class="l" x="8" y="140">bin 0</text>
-              <text class="l" x="440" y="140">bin 255</text>
-              <text class="l" x="8" y="154">256 bins &middot; 2^16 samples</text>
-            </svg>
-          </div>
-          <p style="margin-top:1rem">
-            The compiled circuit ships its own constraint system and witness generator:
-            <span class="mono" style="text-transform:none;letter-spacing:0">entropy_audit_poly.r1cs</span> and the
-            WebAssembly witness calculator beside it.
-          </p>
-        </div>
-      </div>
     </div>
   </section>
 
@@ -432,47 +470,42 @@ node circuits/scripts/entropy_poly_prove.mjs --assert</pre>
 
 <script>
 (function(){
-  var flow = document.getElementById('flow');
-  if (!flow) return;
-  var sts = Array.prototype.slice.call(flow.querySelectorAll('.st'));
-  var pulse = document.getElementById('pulse');
-  var sysReduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var box = document.getElementById('console');
+  if (!box) return;
+  var acts = Array.prototype.slice.call(box.querySelectorAll('.act'));
+  var fill = document.getElementById('cfill');
+  var tEl = document.getElementById('actTitle');
+  var sEl = document.getElementById('actSub');
+  var bEl = document.getElementById('actBody');
   var toggle = document.getElementById('motionToggle');
+  var sysReduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var on = !sysReduce;
   var i = 0, timer = null;
 
+  function show(n){
+    i = (n + acts.length) % acts.length;
+    acts.forEach(function(a, k){ a.classList.toggle('on', k === i); });
+    var a = acts[i];
+    if (fill) fill.style.width = (((i + 1) / acts.length) * 100).toFixed(1) + '%';
+    if (tEl) tEl.textContent = a.getAttribute('data-title');
+    if (sEl) sEl.textContent = a.getAttribute('data-sub');
+    if (bEl) bEl.textContent = a.getAttribute('data-body') || bEl.textContent;
+  }
+  function start(){ if (!on || timer) return; timer = setInterval(function(){ show(i + 1); }, 4000); }
+  function stop(){ clearInterval(timer); timer = null; }
   function setMotion(state){
     on = state;
     if (toggle) { toggle.setAttribute('aria-pressed', String(on)); toggle.textContent = 'Motion: ' + (on ? 'on' : 'off'); }
-    if (pulse) pulse.style.display = on ? '' : 'none';
-    if (!on) { sts.forEach(function(s){ s.classList.add('on'); }); clearInterval(timer); timer = null; }
+    if (!on) { stop(); acts.forEach(function(a){ a.classList.add('on'); }); if (fill) fill.style.width = '100%'; }
     else { show(i); start(); }
   }
-  function start(){
-    if (!on || timer) return;
-    timer = setInterval(function(){ show(i + 1); }, 1500);
-  }
-  function stop(){ clearInterval(timer); timer = null; }
-
-  function show(n){
-    i = (n + sts.length) % sts.length;
-    sts.forEach(function(s, k){ s.classList.toggle('on', k === i); });
-    var s = sts[i];
-    pulse.style.transform = 'translateY(' + (s.offsetTop + s.offsetHeight / 2) + 'px)';
-  }
-  if (sts.length === 0) return;
-  if (toggle) { toggle.addEventListener('click', function(){ setMotion(!on); }); }
-  sts.forEach(function(s, k){ s.addEventListener('mouseenter', function(){ show(k); }); });
+  acts.forEach(function(a, k){ a.addEventListener('mouseenter', function(){ show(k); }); });
   if ('IntersectionObserver' in window) {
-    new IntersectionObserver(function(entries){
-      entries.forEach(function(e){
-        if (e.isIntersecting) { start(); } else { stop(); }
-      });
-    }, { threshold: 0.2 }).observe(flow);
-  } else {
-    timer = setInterval(function(){ show(i + 1); }, 1500);
-  }
-  window.addEventListener('resize', function(){ if (on) show(i); });
+    new IntersectionObserver(function(es){
+      es.forEach(function(e){ if (e.isIntersecting) { start(); } else { stop(); } });
+    }, { threshold: 0.2 }).observe(box);
+  } else { start(); }
+  if (toggle) toggle.addEventListener('click', function(){ setMotion(!on); });
   setMotion(on);
 })();
 </script>
